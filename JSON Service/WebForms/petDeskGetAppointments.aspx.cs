@@ -57,7 +57,7 @@ using Utility;
 //****************************************************************************************
 
 //test string (debug enabled):
-//http://khenzel.info:8700/WebForms/petDeskGetAppointments.aspx?&debugmode=1
+//http://khenzel.info:8700/WebForms/petDeskGetAppointments.aspx?debugmode=1
 
 
 namespace SolutionsWeb.WebForms
@@ -100,6 +100,8 @@ namespace SolutionsWeb.WebForms
                 _debugmode = Request.QueryString["debugmode"];
                 #endregion Page URL Request Parameters
 
+                dgvResults.Visible = false;
+
                 DebugModePrint("<h1><b>PetDesk Appointments Retrieval</b></h1><h2>***Debug Mode***</h2>");
                 DebugModePrint("<p><b>Appointment retrieval initiated: </b></p>",true);
 
@@ -110,13 +112,26 @@ namespace SolutionsWeb.WebForms
                 DebugModePrint(SerializeObject(appointments));
 
                 // Process the appointment types and requests to a DataTable with frequency counter
-                var dtAppointments = AddRecordToDataTable(appointments);
+                var dtAppointments = AddRecordsToDataTable(appointments);
 
                 DebugModePrint("<br><p><b>Appointments inserting into the database for retrieval.</b></p></br>",true);
 
                 // DataTable is to be passed in via SPROC datatype param to insert to SolutionsWeb.dbo.tbl_PetDesk_Appointments_Frequency
                 var dtResults = ExecuteProcedureWithDataTable(dtAppointments, 
                     "usp_petdesk_insert_appointments", "@appointmentsDataTable", "PetDeskAppointmentsDataTable");
+
+                if (_debugmode == "1")
+                {
+                    // Pull records for display in debug mode
+                    Db.Connection.EstablishDbConnection("usp_get_petdesk_appointments", dtResults, null, null, true, 60);
+
+                    if (dtResults?.Rows.Count > 0)
+                    {
+                        dgvResults.Visible = true;
+                        dgvResults.DataSource = dtResults;
+                        dgvResults.DataBind();
+                    }
+                }
 
                 DebugModePrint($"<br><p><b>{dtResults.Rows[0]["RowsInserted"]} records successfully inserted into the database.</b></p></br>",true);
             }
@@ -146,7 +161,7 @@ namespace SolutionsWeb.WebForms
             }
         }
 
-        private static DataTable AddRecordToDataTable(object appointments)
+        private static DataTable AddRecordsToDataTable(object appointments)
         {
             try
             {
