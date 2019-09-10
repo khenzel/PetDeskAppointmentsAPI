@@ -48,11 +48,11 @@ AS
 	
 	SET NOCOUNT ON
 	
-	-- Drop temp table if exists
+	-- Drop table if exists
 	IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tbl_PetDesk_Appointments_Frequency]'))
 	DROP TABLE [dbo].[tbl_PetDesk_Appointments_Frequency]
 	
-	-- Create our temp table with the fill from our service API load
+	-- Create our table with the fill from our service API load
 	SELECT *
 	INTO tbl_PetDesk_Appointments_Frequency
 	FROM @appointmentsDataTable adt
