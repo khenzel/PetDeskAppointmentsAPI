@@ -22,11 +22,15 @@ GO
 -- ==========================================================================================
 
 CREATE PROCEDURE [dbo].[usp_get_petdesk_appointments]  
+
+	@TypeFilter TINYINT = 0 -- 0 = all, 1 = Request, 2 = Type
 	
 AS  
 SELECT [Type]
 	   , [Value]
 	   , [Frequency]
 FROM dbo.[tbl_PetDesk_Appointments_Frequency] 
-
-
+WHERE 
+	(@TypeFilter = 1) AND [Type] = 'apptRequest'
+	OR (@TypeFilter = 2) AND [Type] = 'apptType'
+	OR @TypeFilter = 0
