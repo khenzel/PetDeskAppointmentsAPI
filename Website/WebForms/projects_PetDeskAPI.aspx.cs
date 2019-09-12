@@ -244,31 +244,25 @@ namespace SolutionsWeb
             // Hide/expose indidcated panel group
             try
             {
+                pnlCreateUser.Visible = false;
+                pnlLogin.Visible = false;
+                pnlApiRequest.Visible = false;
+                pnlGridView.Visible = false;
+                
                 switch (panelToExpose)
                 {
                     case 2: // pnlLogin
-                        pnlCreateUser.Visible = false;
                         pnlLogin.Visible = true;
-                        pnlApiRequest.Visible = false;
-                        pnlGridView.Visible = false;
                         break;
                     case 3: // pnlApiRequest
-                        pnlCreateUser.Visible = false;
-                        pnlLogin.Visible = false;
                         pnlApiRequest.Visible = true;
-                        pnlGridView.Visible = false;
                         break;
                     case 4: // pnlGridView + pnlApiRequest
-                        pnlCreateUser.Visible = false;
-                        pnlLogin.Visible = false;
                         pnlApiRequest.Visible = true;
                         pnlGridView.Visible = true;
                         break;
                     default: // pnlCreateUser (default)
                         pnlCreateUser.Visible = true;
-                        pnlLogin.Visible = false;
-                        pnlApiRequest.Visible = false;
-                        pnlGridView.Visible = false;
                         break;
                 }
             }
