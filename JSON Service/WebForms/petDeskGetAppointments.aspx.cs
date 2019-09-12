@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
+using System.Web.UI;
 using System.Xml.Serialization;
 using Utility;
 
@@ -134,6 +135,10 @@ namespace SolutionsWeb.WebForms
                 }
 
                 DebugModePrint($"<br><p><b>{dtResults.Rows[0]["RowsInserted"]} records successfully inserted into the database.</b></p></br>",true);
+
+                if (_debugmode == "1") return;
+
+                ClientScript.RegisterStartupScript(typeof(Page), "closePage", "window.close();", true);
             }
             catch (Exception ex)
             {
@@ -306,7 +311,7 @@ namespace SolutionsWeb.WebForms
             
         }
 
-        private static object RetrieveAppointments()
+        public static object RetrieveAppointments()
         {
             // Return all Appointments for PetDesk via JSON Deserialization from the target host
             try
