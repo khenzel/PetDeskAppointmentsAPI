@@ -123,16 +123,14 @@
             </tbody>
         </table>
             <br/><br/>
-            <asp:Label ID="txtOutput" runat="server" Text=""></asp:Label>
-            <br/><br/>
-        <asp:Panel ID="pnlCreateUser" runat="server">
+        <asp:Panel ID="pnlCreateUser" runat="server" DefaultButton="btnNewRegister">
             <table style="width: 55%" class="ms-list2-main" border="1">
                 <!-- fpstyle: 25,011111100 -->
                 <tr>
                     <td class="auto-style3"><strong>New User Registration</strong></td>
                     <td class="auto-style14">&nbsp;</td>
                     <td class="auto-style9">
-                        <asp:Button id="btnNewLogin" runat="server" Text="Login" Width="150px" class="ms-list2-odd" OnClick="btnNewLogin_Click" />
+                        <asp:Button id="btnNewLogin" runat="server" Text="Go To Login" Width="150px" class="ms-list2-odd" OnClick="btnNewLogin_Click" />
                     </td>
                 </tr>
                 <tr>
@@ -171,14 +169,14 @@
             </table>
         </asp:Panel>
             
-        <asp:Panel ID="pnlLogin" runat="server">
+        <asp:Panel ID="pnlLogin" runat="server" DefaultButton="btnExistingLogin">
             <table style="width: 55%" class="ms-list2-main" border="1">
                 <!-- fpstyle: 25,011111100 -->
                 <tr>
                     <td class="auto-style21"><strong>Existing User Login</strong></td>
                     <td class="auto-style22"></td>
                     <td class="auto-style23">
-                        <asp:Button id="btnExistingRegister" runat="server" Text="Register" Width="150px" class="ms-list2-odd" OnClick="btnExistingRegister_Click" />
+                        <asp:Button id="btnExistingRegister" runat="server" Text="Go To Register" Width="150px" class="ms-list2-odd" OnClick="btnExistingRegister_Click" />
                     </td>
                 </tr>
                 <tr>
@@ -207,7 +205,7 @@
             </table>
         </asp:Panel>
         
-        <asp:Panel ID="pnlApiRequest" runat="server">
+        <asp:Panel ID="pnlApiRequest" runat="server" DefaultButton="btnApiRequest">
             <table style="width: 55%" class="ms-list2-main" border="1">
                 <!-- fpstyle: 25,011111100 -->
                 <tr>
@@ -247,18 +245,9 @@
             <tbody>
             <tr display="block" runat="server" >
                 <td class="centerBtn" >
-                    <asp:GridView ID="dgvResults" runat="server" BackColor="White" BorderColor="#999999" BorderStyle="None" BorderWidth="1px" CellPadding="10" CellSpacing="5" GridLines="Vertical">
-                        <AlternatingRowStyle BackColor="#DCDCDC" />
-                        <FooterStyle BackColor="#CCCCCC" ForeColor="Black" />
-                        <HeaderStyle BackColor="#000084" Font-Bold="True" ForeColor="White" />
-                        <PagerStyle BackColor="#999999" ForeColor="Black" HorizontalAlign="Center" />
-                        <RowStyle BackColor="#EEEEEE" ForeColor="Black" />
-                        <SelectedRowStyle BackColor="#008A8C" Font-Bold="True" ForeColor="White" />
-                        <SortedAscendingCellStyle BackColor="#F1F1F1" />
-                        <SortedAscendingHeaderStyle BackColor="#0000A9" />
-                        <SortedDescendingCellStyle BackColor="#CAC9C9" />
-                        <SortedDescendingHeaderStyle BackColor="#000065" />
-                    </asp:GridView>
+                    <asp:Label ID="lblGridViewHeader" runat="server" Text="" CssClass="auto-style17"></asp:Label>
+                    <asp:GridView ID="dgvResults" runat="server" CssClass="myGridClass">
+                    </asp:GridView>                   
                 </td>
             </tr>
         </tbody>
@@ -266,10 +255,12 @@
         </asp:Panel>
 
    	  <article id="main">
-	    <h4>Project Links:<br/><li><a href="http://khenzel.info:8700/Assets/Projects/PetDeskAPI" target="_blank">PetDesk Appointments API Endpoint</a></li>
-          <li><a href="http://khenzel.info:8700/webForms/petDeskGetAppointments.aspx" target="_blank">PetDesk Get Appointments JSON Service</a></li>
+	    <h4>Project Links:<br/>
+            <li><a href="http://khenzel.info:8700/Assets/Projects/PetDeskAPI" target="_blank">PetDesk Appointments API Endpoint</a></li>
+            <li><a href="http://khenzel.info:8700/webForms/petDeskGetAppointments.aspx" target="_blank">PetDesk Get Appointments JSON Service</a></li>
             <li><a href="http://khenzel.info:8700/webForms/petDeskGetAppointments.aspx?debugmode=1" target="_blank">PetDesk Get Appointments JSON Service - debug mode enabled</a></li>
             <li><a href="https://github.com/khenzel/PetDeskAppointmentsAPI" target="_blank">GitHub Repository link to project - PetDeskAppointmentsAPI</a></li>
+            <li><a href="../Assets/Portfolio/Projects_PetDesk_Appointments_WebApi-Design_Document_v1.pdf" target="_blank">Design Document: Appointments Web API Coding Exercise - PetDesk</a></li>
         &nbsp;</h4>
 	    <p>&nbsp;</p>
 	  </article>
@@ -285,6 +276,55 @@
 
 <style type="text/css">
 <!--
+
+/*gridview styling css*/
+    .myGridClass {
+        width: 100%;
+        /*this will be the color of the odd row*/
+        background-color: #fff;
+        margin: 5px 0 10px 0;
+        border: solid 1px #525252;
+        border-collapse:collapse;
+    }
+
+    /*data elements*/
+    .myGridClass td {
+        padding: 2px;
+        border: solid 1px #c1c1c1;
+        color: #717171;
+    }
+
+    /*header elements*/
+    .myGridClass th {
+        padding: 4px 2px;
+        color: #fff;
+        background: #424242;
+        border-left: solid 1px #525252;
+        font-size: 0.9em;
+    }
+
+    /*his will be the color of even row*/
+    .myGridClass .myAltRowClass { background: #fcfcfc repeat-x top; }
+
+    /*and finally, we style the pager on the bottom*/
+    .myGridClass .myPagerClass { background: #424242; }
+
+    .myGridClass .myPagerClass table { margin: 5px 0; }
+
+    .myGridClass .myPagerClass td {
+        border-width: 0;
+        padding: 0 6px;
+        border-left: solid 1px #666;
+        font-weight: bold;
+        color: #fff;
+        line-height: 12px;
+    }
+
+    .myGridClass .myPagerClass a { color: #666; text-decoration: none; }
+
+    .myGridClass .myPagerClass a:hover { color: #000; text-decoration: none; } 
+/*end gridview styling css*/
+
 .LibraryFooter {
 	color: #000;
 }

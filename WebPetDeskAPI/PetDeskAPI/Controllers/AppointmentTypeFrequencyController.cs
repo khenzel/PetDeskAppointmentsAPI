@@ -1,28 +1,26 @@
 ﻿using System.Data;
 using System.Web.Http;
-using Utility;
+using PetDeskAPI.Models;
 
 namespace PetDeskAPI.Controllers
 {
     [Authorize]
     public class AppointmentTypeFrequencyController : ApiController
     {
-        private DataTable dtReturn = new DataTable();
+        private DataTable dtAppointmentTypeFrequency = new DataTable();
 
         public AppointmentTypeFrequencyController()
         {
-            var aryParameters = new[,] { { "@TypeFilter" }, { "2" } };
-            var oAryType = new[] { SqlDbType.NVarChar };
-
-            Db.Connection.EstablishDbConnection("usp_get_petdesk_appointments", dtReturn, aryParameters,
-                oAryType, true, 60);
+            // Constructor populates our data from the model for return to our Get API call
+            var model = new AppointmentTypeFrequencyModels();
+            dtAppointmentTypeFrequency = model.appointmentTypeFrequency;
         }
 
         // GET: api/AppointmentDistribution
         public DataTable Get()
         {
-            //return apptRequest;
-            return dtReturn;
-        }
+            //return appointment type data to the caller;
+            return dtAppointmentTypeFrequency;
+        }   
     }
 }

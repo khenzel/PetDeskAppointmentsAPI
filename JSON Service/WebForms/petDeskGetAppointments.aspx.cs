@@ -56,6 +56,9 @@ using Utility;
 //                "breed": "German Shepherd"
 //            }
 //****************************************************************************************
+//  History:
+//   09/05/2019 Kevin Henzel                    Created
+//****************************************************************************************
 
 //test string (debug enabled):
 //http://khenzel.info:8700/WebForms/petDeskGetAppointments.aspx?debugmode=1
@@ -65,9 +68,10 @@ namespace SolutionsWeb.WebForms
 {
     public partial class petDeskGetAppointments : System.Web.UI.Page
     {
+        // query string container to indicate debug mode output via response.write
         private static string _debugmode;
 
-        #region DeSerilization PetDesk API Classes
+        #region serilization classes
         public class AppointmentsRootobject
         {
             public int appointmentId { get; set; }
@@ -93,6 +97,9 @@ namespace SolutionsWeb.WebForms
             public string breed { get; set; }
         }
         #endregion DeSerilization PetDesk API Classes
+        /// <summary>Handles the Load event of the Page control.</summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -100,9 +107,8 @@ namespace SolutionsWeb.WebForms
                 #region Page URL Request Parameters
                 _debugmode = Request.QueryString["debugmode"];
                 #endregion Page URL Request Parameters
-
-                dgvResults.Visible = false;
-
+              
+                // DebugMode text only displayed when query string "debugmode=1" is sent
                 DebugModePrint("<h1><b>PetDesk Appointments Retrieval</b></h1><h2>***Debug Mode***</h2>");
                 DebugModePrint("<p><b>Appointment retrieval initiated: </b></p>",true);
 
@@ -121,6 +127,8 @@ namespace SolutionsWeb.WebForms
                 var dtResults = ExecuteProcedureWithDataTable(dtAppointments, 
                     "usp_petdesk_insert_appointments", "@appointmentsDataTable", "PetDeskAppointmentsDataTable");
 
+                dgvResults.Visible = false;
+
                 if (_debugmode == "1")
                 {
                     // Pull records for display in debug mode
@@ -138,6 +146,7 @@ namespace SolutionsWeb.WebForms
 
                 if (_debugmode == "1") return;
 
+                // If not in debug mode, this auto closes the page after the service request is completed
                 ClientScript.RegisterStartupScript(typeof(Page), "closePage", "window.close();", true);
             }
             catch (Exception ex)
@@ -147,33 +156,16 @@ namespace SolutionsWeb.WebForms
             }           
         }
 
-        private void DebugModePrint(string printMessage, bool logToDatabase = false)
-        {
-            // Print out to the interface if the debugmode flag is set
-            // Optionally post as information to the application log table
-            try
-            {
-                if (_debugmode == "1")
-                    Response.Write(printMessage);
-
-                if (logToDatabase)
-                    Db.Log.Write(Db.Log.Level.Information, "petDeskGetAppointments", printMessage);
-            }
-            catch (Exception ex)
-            {
-                Db.Log.Write(Db.Log.Level.Error, "petDeskGetAppointments",
-                    "DebugModePrint: " + ex.Message);
-            }
-        }
-
-        private static DataTable AddRecordsToDataTable(object appointments)
+        /// <summary>Convert the incoming object into a DataTable containing the following structure:
+        /// Type = apptType / apptRequest
+        /// Value = apptType text / <month>-<year> converted from DateTime
+        /// Frequency = # of occurrences the value has been identified</summary>
+        /// <param name="appointments">The appointments.</param>
+        /// <returns>DataTable.</returns>
+        public static DataTable AddRecordsToDataTable(object appointments)
         {
             try
             {
-                // Convert the incoming object into a DataTable containing the following structure:
-                // Type = apptType / apptRequest
-                // Value = apptType text / <month>-<year> converted from DateTime
-                // Frequency = # of occurrences the value has been identified
                 var dtAppointments = new DataTable();
                 dtAppointments.Clear();
                 dtAppointments.Columns.Add("Type");
@@ -186,10 +178,9 @@ namespace SolutionsWeb.WebForms
                     var appointmentType = ((AppointmentsRootobject)o)?.appointmentType;
                     var appointmentRequest = Convert.ToDateTime(((AppointmentsRootobject)o)?.requestedDateTimeOffset);
                     var appointmentRequestMonthYear = $"{appointmentRequest.Month}-{appointmentRequest.Year}";
-
                     var countType = GetMatchingDataTableRow(dtAppointments, appointmentType);
                     var countRequest = GetMatchingDataTableRow(dtAppointments, appointmentRequestMonthYear);
-                  
+
                     if (countType > 0)
                     {
                         // Here we have a matching segment for our type value field. Iterate the frequency for this field and move on.
@@ -229,15 +220,35 @@ namespace SolutionsWeb.WebForms
             }
         }
 
-        private static DataTable ExecuteProcedureWithDataTable(DataTable dt, string storedProcedureName, string parameterName, string dataTypeName)
+        /// <summary>Print out to the interface if the debugmode flag is set
+        /// Optionally post as information to the application log table</summary>
+        /// <param name="printMessage">The print message.</param>
+        /// <param name="logToDatabase">if set to <c>true</c> [log to database].</param>
+        private void DebugModePrint(string printMessage, bool logToDatabase = false)
         {
-            //**************************************************************************************************************************
-            //  Summary:  generate an upload CSV structured for file upload
-            //**************************************************************************************************************************
-            //  History:
-            //   09/05/2019 Kevin Henzel                    Created
-            //**************************************************************************************************************************
+            try
+            {
+                if (_debugmode == "1")
+                    Response.Write(printMessage);
 
+                if (logToDatabase)
+                    Db.Log.Write(Db.Log.Level.Information, "petDeskGetAppointments", printMessage);
+            }
+            catch (Exception ex)
+            {
+                Db.Log.Write(Db.Log.Level.Error, "petDeskGetAppointments",
+                    "DebugModePrint: " + ex.Message);
+            }
+        }
+      
+        /// <summary>Passes data table payload in to the SQL SPROC as a parameter for storage.</summary>
+        /// <param name="dt">generate an upload CSV structured for file upload.</param>
+        /// <param name="storedProcedureName">Name of the stored procedure.</param>
+        /// <param name="parameterName">Name of the parameter.</param>
+        /// <param name="dataTypeName">Name of the data type.</param>
+        /// <returns>DataTable.</returns>
+        public static DataTable ExecuteProcedureWithDataTable(DataTable dt, string storedProcedureName, string parameterName, string dataTypeName)
+        {
             try
             {
                 var dtResult = new DataTable();
@@ -272,9 +283,12 @@ namespace SolutionsWeb.WebForms
             }        
         }
 
+        /// <summary>Returns the row index of the matching string value from the data table.</summary>
+        /// <param name="dt">The dt.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>System.Int32.</returns>
         private static int GetMatchingDataTableRow(DataTable dt, string value)
         {
-            // Returns the row index of the matching string value from the datatable
             try
             {
                 var result = dt.Select($"Value = '{value}'");
@@ -289,31 +303,11 @@ namespace SolutionsWeb.WebForms
             }
         }
 
-        private static string SerializeObject<T>(T toSerialize)
-        {
-            // Converts the object and its members to a write-able string for view
-            try
-            {              
-                var xmlSerializer = new XmlSerializer(toSerialize.GetType());
-
-                using (var textWriter = new StringWriter())
-                {
-                    xmlSerializer.Serialize(textWriter, toSerialize);
-                    return textWriter.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                Db.Log.Write(Db.Log.Level.Error, "petDeskGetAppointments",
-                    "SerializeObject: " + ex.Message);
-                return null;
-            }
-            
-        }
-
+        /// <summary>Return all Appointments for PetDesk via JSON Deserialization from the target host.</summary>
+        /// <returns>System.Object.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public static object RetrieveAppointments()
         {
-            // Return all Appointments for PetDesk via JSON Deserialization from the target host
             try
             {
                 const string url = "https://sampledata.petdesk.com/api/appointments";
@@ -344,6 +338,30 @@ namespace SolutionsWeb.WebForms
                     "RetrieveAppointments: " + ex.Message);
                 return null;
             }
-        }       
+        }
+
+        /// <summary>Converts the object and its members to a write-able string for view.</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="toSerialize">To serialize.</param>
+        /// <returns>System.String.</returns>
+        private static string SerializeObject<T>(T toSerialize)
+        {
+            try
+            {              
+                var xmlSerializer = new XmlSerializer(toSerialize.GetType());
+
+                using (var textWriter = new StringWriter())
+                {
+                    xmlSerializer.Serialize(textWriter, toSerialize);
+                    return textWriter.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                Db.Log.Write(Db.Log.Level.Error, "petDeskGetAppointments",
+                    "SerializeObject: " + ex.Message);
+                return null;
+            }          
+        }      
     }
 }

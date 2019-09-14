@@ -31,15 +31,6 @@ namespace SolutionsWeb {
         protected global::System.Web.UI.WebControls.Button btnRunJsonService;
         
         /// <summary>
-        /// txtOutput control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label txtOutput;
-        
-        /// <summary>
         /// pnlCreateUser control.
         /// </summary>
         /// <remarks>
@@ -200,6 +191,15 @@ namespace SolutionsWeb {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlGridView;
+        
+        /// <summary>
+        /// lblGridViewHeader control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblGridViewHeader;
         
         /// <summary>
         /// dgvResults control.
