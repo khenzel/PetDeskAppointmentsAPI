@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Web.Script.Serialization;
 using System.Web.UI;
@@ -177,23 +178,36 @@ namespace SolutionsWeb.WebForms
 
                     var appointmentType = ((AppointmentsRootobject)o)?.appointmentType;
                     var appointmentRequest = Convert.ToDateTime(((AppointmentsRootobject)o)?.requestedDateTimeOffset);
-                    var appointmentRequestMonthYear = $"{appointmentRequest.Month}-{appointmentRequest.Year}";
-                    var countType = GetMatchingDataTableRow(dtAppointments, appointmentType);
+                    var appointmentRequestMonthYear = $"{appointmentRequest.Month}-{appointmentRequest.Year}";                    
                     var countRequest = GetMatchingDataTableRow(dtAppointments, appointmentRequestMonthYear);
 
-                    if (countType > 0)
-                    {
-                        // Here we have a matching segment for our type value field. Iterate the frequency for this field and move on.
-                        dtAppointments.Rows[countType]["Frequency"] = Convert.ToInt32(dtAppointments.Rows[countType]["Frequency"]) + 1;
-                    }
-                    else
-                    {
-                        var r = dtAppointments.NewRow();
-                        r["Type"] = "apptType";
-                        r["Value"] = appointmentType;
-                        r["Frequency"] = "1";
-                        dtAppointments.Rows.Add(r);
-                    }
+                    // Re-define types based off comma delimiter for multi-selection list items.
+                    var appointmentTypes = appointmentType?.Split(',').Select(x => x.Trim()).ToArray();
+
+                    if (appointmentTypes != null)
+                        foreach (var appointment in appointmentTypes)
+                        {
+                            var countType = GetMatchingDataTableRow(dtAppointments, appointmentType);
+
+                            // Process the appointment types. If a comma separated value is detected, treat it as an 
+                            // additional row for frequency counting.
+                            if (countType > 0)
+                            {
+                                // Here we have a matching segment for our type value field. Iterate the frequency for this field and move on.
+                                dtAppointments.Rows[countType]["Frequency"] =
+                                    Convert.ToInt32(dtAppointments.Rows[countType]["Frequency"]) + 1;
+                            }
+                            else
+                            {
+                                var r = dtAppointments.NewRow();
+
+                                r["Type"] = "apptType";
+                                r["Value"] = appointment;
+                                r["Frequency"] = "1";
+
+                                dtAppointments.Rows.Add(r);
+                            }
+                        }
 
                     if (countRequest > 0)
                     {
